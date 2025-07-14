@@ -1,48 +1,59 @@
-var React = require('react');
-var GitHubUserService = require('../services/GitHubUserService');
+import React, { useRef } from 'react';
+import PropTypes from 'prop-types';
+import GitHubUserService from '../services/GitHubUserService';
 
-var SearchUser = React.createClass({
-	handleSubmit: function(e){
-		e.preventDefault();
-		GitHubUserService.getByUsername(this.refs.username.value)
-			.then(function(response){
-				this.props.updateUser(response.data);
-			}.bind(this));
+const SearchUser = ({ updateUser, updateRepos }) => {
+  const usernameRef = useRef(null);
 
-		GitHubUserService.getReposByUsername(this.refs.username.value)
-			.then(function(response){
-				this.props.updateRepos(response.data);
-			}.bind(this));
-	},
-	render: function(){
-		return (
-			<div className="jumbotron">
-				<h1>GitHub info</h1>
-				<div className="row">
-					<form onSubmit={this.handleSubmit}>
-						<div className="form-group">
-							<label htmlFor="">Username</label>
-							<input 
-								type="text" 
-								className="form-control"
-								placeholder="Ex: Tata"
-								ref="username"
-								/>
-						</div>
-						<button 
-							className="btn btn-primary"
-							type="submit"
-							>Buscar</button>
-					</form>
-				</div>
-			</div>
-		);
-	}
-});
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const username = usernameRef.current.value;
+    
+    if (!username.trim()) return;
 
-SearchUser.propTypes = {
-    updateUser: React.PropTypes.func.isRequired,
-    updateRepos: React.PropTypes.func.isRequired
+    try {
+      const [userResponse, reposResponse] = await Promise.all([
+        GitHubUserService.getByUsername(username),
+        GitHubUserService.getReposByUsername(username)
+      ]);
+      
+      updateUser(userResponse.data);
+      updateRepos(reposResponse.data);
+    } catch (error) {
+      console.error('Erro ao buscar dados do usuário:', error);
+    }
+  };
+
+  return (
+    <div className="jumbotron">
+      <h1>GitHub Info</h1>
+      <div className="row">
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input 
+              id="username"
+              type="text" 
+              className="form-control"
+              placeholder="Ex: octocat"
+              ref={usernameRef}
+            />
+          </div>
+          <button 
+            className="btn btn-primary"
+            type="submit"
+          >
+            Buscar
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
-module.exports = SearchUser;
+SearchUser.propTypes = {
+  updateUser: PropTypes.func.isRequired,
+  updateRepos: PropTypes.func.isRequired
+};
+
+export default SearchUser;

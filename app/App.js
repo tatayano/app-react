@@ -1,6 +1,8 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import GitHub from './components/GitHub';
 
-var GitHub = require('./components/GitHub');
+const container = document.getElementById('app');
+const root = createRoot(container);
 
-ReactDOM.render(<GitHub />, document.getElementById('app'));
+root.render(<GitHub />);
