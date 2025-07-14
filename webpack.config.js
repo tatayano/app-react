@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './app/App.js',
+  entry: './src/main.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].[contenthash].js',
@@ -35,14 +35,6 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
-      },
-      {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: 'asset/resource',
-      },
-      {
-        test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        type: 'asset/resource',
       }
     ]
   },
@@ -70,8 +62,8 @@ module.exports = {
     },
     compress: true,
     port: 3000,
-    open: true,
     hot: true,
+    open: true,
     historyApiFallback: true,
     client: {
       overlay: {
@@ -80,28 +72,37 @@ module.exports = {
       },
     },
   },
-  resolve: {
-    extensions: ['.js', '.jsx'],
-    alias: {
-      '@': path.resolve(__dirname, 'app'),
-    }
-  },
   optimization: {
-    moduleIds: 'deterministic',
-    runtimeChunk: 'single',
     splitChunks: {
+      chunks: 'all',
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
           chunks: 'all',
         },
+        common: {
+          name: 'common',
+          minChunks: 2,
+          chunks: 'all',
+          enforce: true,
+        },
       },
     },
+  },
+  resolve: {
+    extensions: ['.js', '.jsx'],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@domain': path.resolve(__dirname, 'src/domain'),
+      '@application': path.resolve(__dirname, 'src/application'),
+      '@infrastructure': path.resolve(__dirname, 'src/infrastructure'),
+      '@presentation': path.resolve(__dirname, 'src/presentation'),
+    }
   },
   performance: {
     hints: false,
     maxEntrypointSize: 512000,
-    maxAssetSize: 512000,
+    maxAssetSize: 512000
   }
 };
